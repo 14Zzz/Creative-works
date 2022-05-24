@@ -1,25 +1,24 @@
-#include "graph.h"
-#include <glut.h>
+#include "Header.h"
+#include <GL/glut.h>
 #include <stdio.h>
 #include <iostream>
 #include <vector>
 #include <sstream>
 
 
-
 int main(int argc, char* argv[])
 {
 	setlocale(LC_ALL, "rus");
 	glutInit(&argc, argv);
-	graph = makeGraph();
+	graph = graph_implementation();
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
-	glutInitWindowSize(1350, 730);
-	glutCreateWindow("Graph");
-	WinW = glutGet(GLUT_WINDOW_WIDTH);
-	WinH = glutGet(GLUT_WINDOW_HEIGHT);
-	glutDisplayFunc(display);
+	glutInitWindowSize(1920, 1080);
+	glutCreateWindow("Задача коммивояжера");
+	Win_W = glutGet(GLUT_WINDOW_WIDTH);
+	Win_H = glutGet(GLUT_WINDOW_HEIGHT);
+	glutDisplayFunc(watch_display);
 	glutReshapeFunc(reshape);
-	glutMouseFunc(mouseClick);
+	glutMouseFunc(button_click);
 	glutMainLoop();
 	return 0;
 }
