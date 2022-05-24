@@ -454,7 +454,7 @@ void setCoord(int i, int n) // устанавливаем координаты
 }
 
 void drawCircle(int x, int y, int R) // отрисовка круга
-{
+
 	glColor3f(0.3, 0.9, 0.7); // установка цвета
 	float x1, y1;
 	glBegin(GL_POLYGON);
@@ -509,7 +509,7 @@ void draw_Line_for_way(int text, int x0, int y0, int x1, int y1) // отрисо
 	glEnd();
 
 	drawText(text, (x0 + x1) / 2 + 10, (y0 + y1) / 2 + 10); // отрисовка текста
-}
+
 
 
 template<class T>
@@ -554,8 +554,6 @@ void draw_Text_for_menu(string text, int x1, int y1) // отрисовка те�
 		glutBitmapCharacter(font, s[j]);
 }
 
-/*/		Координаты и текст для кнопки		/*/
-
 void drawMenu() // отрисовка меню
 {
 	int move_right = 45;
@@ -595,8 +593,8 @@ void drawMenu() // отрисовка меню
 
 void button_click(int btn, int stat, int x, int y) // реализация кнопок и их расположения
 {
-	int move = 60;
-	int height = 730;
+	int move = 15;
+	int height = 300;
 	if (stat == GLUT_DOWN)
 	{
 
