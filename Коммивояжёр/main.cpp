@@ -12,8 +12,8 @@ int main(int argc, char* argv[])
 	glutInit(&argc, argv);
 	graph = graph_implementation();
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
-	glutInitWindowSize(1920, 1080);
-	glutCreateWindow("Задача коммивояжера");
+	glutInitWindowSize(1280, 720);
+	glutCreateWindow("Коммивояжер");
 	Win_W = glutGet(GLUT_WINDOW_WIDTH);
 	Win_H = glutGet(GLUT_WINDOW_HEIGHT);
 	glutDisplayFunc(watch_display);
