@@ -7,58 +7,71 @@
 
 using namespace std;
 
-int Win_W; 
-int Win_H; 
-
+// Кол-во путей
 int n; 
+// Доп. массив
 int** dynamic_mas; 
+
 int* result; 
-int*** ukazatel_na_matrix; 
 
+// матрица смежности
+int*** Adjacency_matrix;
 
-const int maxSize = 15;
-int kolvo_vershin; 
+const int Predel = 100000;
+int parametr;
+
+// макс кол-во городов
+const int maxSize = 20;
+
+// Кол-во городов
+int goroda; 
+
+//Размеры окна
+int Win_W;
+int Win_H;
 
 template<class T>
-
 class Graph 
 {
-	vector<T> vertList;	
+	vector<T> VertikList;	
 	vector<T> labelList; 
-	bool* visitedVerts = new bool[vertList.size()];
+
+	bool* visitedVerts = new bool[VertikList.size()];
 public:	
+	vector<T> Getter_n(const T& vertex);
+
 	int adjMatrix[maxSize][maxSize]; 
-	Graph(); 
-	~Graph(); 
+	int GetVertPos(const T& vertex);
+	int Getter_kolvo_veshin();
+	int Getter_kolvo_border();
+	int Getter_length(const T& vertex1, const T& vertex2);
+
 	void RenderingGraph(); 
 	void Way_km(const T& vertex1, const T& vertex2, int weight); 
 	void Add_Vertex(const T& vertex); 
-	void Delete_this_Vertex(); 
-	int GetVertPos(const T& vertex);
+	void Delete_this_Vertex();
+	void Print();
+
 	bool IsEmpty(); 
-	bool IsFull(); 
-	int Getter_kolvo_veshin(); 
-	int Getter_kolvo_border(); 
-	int Getter_length(const T& vertex1, const T& vertex2); 
-	vector<T> Getter_n(const T& vertex); 
-	void Print(); 
+	bool IsFull();
+
+	Graph();
+	~Graph();
 };
 
-const int Predel = 100000; // заглушка для прохода в цикл
-int parametr; // 
-
-struct vertCoord
+struct Koord
 {
 	int x, y;
 };
-vertCoord vertC[20];
+Koord vertC[20];
 
 Graph<int> graph; 
 
 
+
 void creating_variables(int***& matrix, int& n, int**& dynamic_mas, int*& result)
 { 
-	n = kolvo_vershin; 
+	n = goroda; 
 	dynamic_mas = new int* [n]; 
 
 	result = new int[n]; 
@@ -84,8 +97,8 @@ void creating_variables(int***& matrix, int& n, int**& dynamic_mas, int*& result
 		}
 	}
 }
-
-void task_solution(int*** matrix, int n, int** dynamic_mas, int* path) 
+// Решение задачи методом ветвей и границ
+void Vet_Gran(int*** matrix, int n, int** dynamic_mas, int* path) 
 {
 	int fist_min;
 	int second_min;
@@ -158,28 +171,78 @@ void task_solution(int*** matrix, int n, int** dynamic_mas, int* path)
 	}
 }
 
-void traveler_man(int*** matrix, int n, int** dynamic_mas, int* result)
+//Граф
+Graph<int> graph_implementation()
+{
+	Graph<int> graph;
+	int amountEdges, sourceVertex, targetVertex, edgeWeight;
+	cout << "Введите количество городов: ";
+	cin >> goroda;
+	cout << endl;
+	while (goroda < 0)
+	{
+		cout << "Число городов не может быть отрицательным" << endl << endl;
+		cout << "Введите количество городов: ";
+		cin >> goroda;
+		cout << endl;
+	}
+	cout << endl;
+	cout << "Введите количество дорог между городами: ";
+	cin >> amountEdges;
+	cout << endl;
+	while (amountEdges < 0)
+	{
+		cout << endl << "Количество дорог не может быть отрицательным " << endl << endl;
+		cout << "Введите количество дорог между городами: ";
+		cin >> amountEdges;
+		cout << endl;
+	}
+	cout << endl;
+
+	for (int i = 1; i <= goroda; ++i) // проход до количества городов
+	{
+		int* vertPtr = &i;
+		graph.Add_Vertex(*vertPtr);
+	}
+
+	for (int i = 0; i < amountEdges; ++i)
+	{
+		cout << "Введите " << i + 1 << " пару городов: " << endl;
+		cout << "Идём из города: ";
+		cin >> sourceVertex;
+		cout << endl;
+		int* sourceVertPtr = &sourceVertex;
+		cout << "В город: ";
+		cin >> targetVertex;
+		cout << endl;
+		int* targetVertPtr = &targetVertex;
+
+		cout << "Введите длину пути между городами: ";
+		cin >> edgeWeight;
+		while (edgeWeight <= 0)
+		{
+			cout << endl << "Длина пути должна быть больше нуля. Введите длину пути между городами: "; cin >> edgeWeight; cout << endl;
+		}
+		cout << endl;
+		graph.Way_km(*sourceVertPtr, *targetVertPtr, edgeWeight);
+	}
+	cout << endl;
+	return graph;
+}
+
+void BestWay(int*** matrix, int n, int** dynamic_mas, int* result)
 {
 	creating_variables(matrix, n, dynamic_mas, result); 
-	task_solution(matrix, n, dynamic_mas, result); 
-
-	cout << "\nЗаданные пути: ";
-
+	Vet_Gran(matrix, n, dynamic_mas, result); 
 	int s = 0; 
 	int j; 
 	for (int i = 0; i < n; i++)
 	{
 		j = result[i];
-		cout << "( " << i + 1 << " --> " << j + 1 << " )" << "  "; // вывод путей между пунктами
 		s += graph.adjMatrix[i][j];
 	}
-	cout << endl << endl;
-	for (int i = 0; i < n; i++)
-	{
-		cout << "-------------";
-	}
 	cout << endl << "Лучший путь: ";
-	int temp = 0; // переменная для сравнения
+	int temp = 0;
 	for (int l = 0; l < n;)
 	{
 		for (int i = 0, j = 0; i < n; i++)
@@ -191,7 +254,7 @@ void traveler_man(int*** matrix, int n, int** dynamic_mas, int* result)
 				temp = j + 1;
 				if (temp > 0)
 				{
-					cout << " --> " << temp; 
+					cout << " -> " << temp; 
 					l++;
 				}
 			}
@@ -206,13 +269,13 @@ vector<T> Graph<T>::Getter_n(const T& vertex)
 {
 	vector<T> nbrsList;
 	int vertPos = this->GetVertPos(vertex);
-	if (vertPos != (-1)) // если позиция вершины не равна -1,  
+	if (vertPos != (-1))
 	{
 
-		for (int i = 0, vertListSize = this->vertList.size(); i < vertListSize; ++i)
+		for (int i = 0, VertikListSize = this->VertikList.size(); i < VertikListSize; ++i)
 		{
 			if (this->adjMatrix[vertPos][i] != 0 && this->adjMatrix[i][vertPos] != 0)
-				nbrsList.push_back(this->vertList[i]);
+				nbrsList.push_back(this->VertikList[i]);
 		}
 	}
 	return nbrsList;
@@ -225,7 +288,7 @@ void Graph<T>::Add_Vertex(const T& vertex) // добавление вершин�
 {
 	if (!this->IsFull())
 	{
-		this->vertList.push_back(vertex);
+		this->VertikList.push_back(vertex);
 	}
 	else
 	{
@@ -235,9 +298,9 @@ void Graph<T>::Add_Vertex(const T& vertex) // добавление вершин�
 }
 
 template<class T>
-void Graph<T>::Delete_this_Vertex() // удаление вершины
+void Graph<T>::Delete_this_Vertex() // удаление города
 {
-	this->vertList.pop_back(); // удаляет вершины в стиле стека, те начиная с вершины
+	this->VertikList.pop_back();
 }
 
 
@@ -247,9 +310,9 @@ int Graph<T>::Getter_kolvo_border() // количество границ
 	int amount = 0;
 	if (!this->IsEmpty())
 	{
-		for (int i = 0, vertListSize = this->vertList.size(); i < vertListSize; ++i)
+		for (int i = 0, VertikListSize = this->VertikList.size(); i < VertikListSize; ++i)
 		{
-			for (int j = 0; j < vertListSize; ++j)
+			for (int j = 0; j < VertikListSize; ++j)
 			{
 				if (this->adjMatrix[i][j] == this->adjMatrix[j][i] && this->adjMatrix[i][j] != 0)
 					amount += 1;
@@ -274,32 +337,32 @@ int Graph<T>::Getter_length(const T& vertex1, const T& vertex2) // получе�
 }
 
 template<class T>
-int Graph<T>::Getter_kolvo_veshin() // получение количества вершин
+int Graph<T>::Getter_kolvo_veshin() // получение количества городов
 {
-	return this->vertList.size(); // возвращает размер 
+	return this->VertikList.size();
 }
 
 template<class T>
-bool Graph<T>::IsEmpty() // пустота
+bool Graph<T>::IsEmpty()
 {
-	if (this->vertList.size() != 0)
+	if (this->VertikList.size() != 0)
 		return false;
 	else
 		return true;
 }
 
 template<class T>
-bool Graph<T>::IsFull() // Места нет
+bool Graph<T>::IsFull() // Заполнен
 {
-	return (vertList.size() == maxSize);
+	return (VertikList.size() == maxSize);
 }
 
 template <class T>
 int Graph<T>::GetVertPos(const T& vertex) // получение позиции вершины
 {
-	for (int i = 0; i < this->vertList.size(); ++i)
+	for (int i = 0; i < this->VertikList.size(); ++i)
 	{
-		if (this->vertList[i] == vertex)
+		if (this->VertikList[i] == vertex)
 			return i;
 	}
 	return -1;
@@ -323,69 +386,13 @@ Graph<T>::~Graph()
 }
 
 
-Graph<int> graph_implementation() // реализация графа, его логики работы...
-{
-	Graph<int> graph; // объект класса Graph
-	int amountEdges, sourceVertex, targetVertex, edgeWeight; // создаем переменные
-	cout << endl << "Укажите, в скольких городах вы хотите побывать: ";
-	cin >> kolvo_vershin; // вводим количество вершин
-	cout << endl;
-	while (kolvo_vershin < 0) // проверка ввода
-	{
-		cout << "Количество городов не может быть отрицательным числом!" << endl << endl;
-		cout << "Попробуйте еще раз: ";
-		cin >> kolvo_vershin;
-		cout << endl;
-	}
-	cout << endl;
-	cout << "Введите количество дорог между городами: ";
-	cin >> amountEdges;
-	cout << endl;
-	while (amountEdges < 0)
-	{
-		cout << endl << "Количество дорог не может быть отрицательным числом!" << endl << endl;
-		cout << "Попробуйте еще раз: ";
-		cin >> amountEdges;
-		cout << endl;
-	}
-	cout << endl;
-
-	for (int i = 1; i <= kolvo_vershin; ++i) // проход до количества вершин(включительно)
-	{
-		int* vertPtr = &i;
-		graph.Add_Vertex(*vertPtr);
-	}
-
-	for (int i = 0; i < amountEdges; ++i)
-	{
-		cout << "----------------------" << endl;
-		cout << "Введите " << i + 1 << " пару вершин: " << endl;
-		cout << "----------------------" << endl << endl;
-		cout << "Идём из вершины: ";
-		cin >> sourceVertex;
-		cout << endl;
-		int* sourceVertPtr = &sourceVertex;
-		cout << "В вершину: ";
-		cin >> targetVertex;
-		cout << endl;
-		int* targetVertPtr = &targetVertex;
-
-		cout << "Введите длину пути между данными вершинами(пунктами): ";
-		cin >> edgeWeight;
-		while (edgeWeight < 0) { cout << endl << "Длина пути не может быть отрицательной велечиной. Введите еще раз: "; cin >> edgeWeight; cout << endl; }
-		cout << endl;
-		graph.Way_km(*sourceVertPtr, *targetVertPtr, edgeWeight);
-	}
-	cout << endl;
-	return graph;
-}
-
+// Длина пути
 template<class T>
-void Graph<T>::Way_km(const T& vertex1, const T& vertex2, int weight) // работа с длиной пути
+void Graph<T>::Way_km(const T& vertex1, const T& vertex2, int weight)
 {
 	if (this->GetVertPos(vertex1) != (-1) && this->GetVertPos(vertex2) != (-1))
 	{
-		int vertPos1 = GetVertPos(vertex1); // присваиваем позицию 
+		int vertPos1 = GetVertPos(vertex1); 
 		int vertPos2 = GetVertPos(vertex2);
 		if (this->adjMatrix[vertPos1][vertPos2] != 0 && this->adjMatrix[vertPos2][vertPos1] != 0)
 		{
@@ -397,16 +404,10 @@ void Graph<T>::Way_km(const T& vertex1, const T& vertex2, int weight) // раб�
 		}
 		else
 		{
-			if (weight < 0) { cout << endl << "Длина добавляемого пути не может быть отрицательной велечиной" << endl; return; }
+			if (weight <= 0) { cout << endl << "Длина добавляемого пути должна быть больше нуля" << endl; return; }
 			this->adjMatrix[vertPos1][vertPos2] = weight;
 			this->adjMatrix[vertPos2][vertPos1] = weight;
 		}
-	}
-	else
-	{
-		cout << endl << "Таких пунктов нет" << endl;
-		cout << "Подрузамевается, что вы хотели добавить пункт, поэтому даже в случае ошибочного ввода, в граф добавляется пункт " << endl << endl;
-		return;
 	}
 }
 
@@ -416,10 +417,10 @@ void Graph<T>::Print() // вывод матрицы смежности
 	if (!this->IsEmpty()) // если не пусто
 	{
 		cout << endl << "Матрица смежности: " << endl;
-		for (int i = 0, vertListSize = this->vertList.size(); i < vertListSize; ++i)
+		for (int i = 0, VertikListSize = this->VertikList.size(); i < VertikListSize; ++i)
 		{
-			cout << this->vertList[i] << " ";
-			for (int j = 0; j < vertListSize; ++j)
+			cout << this->VertikList[i] << " ";
+			for (int j = 0; j < VertikListSize; ++j)
 			{
 				cout << " " << this->adjMatrix[i][j] << " ";
 			}
@@ -430,9 +431,9 @@ void Graph<T>::Print() // вывод матрицы смежности
 
 }
 
-void setCoord(int i, int n) // устанавливаем координаты
+void setCoord(int i, int n) 
 {
-	int R_; // в зависимости от случая принимает ширину окна или длину окна
+	int R_;
 
 	int x0 = Win_W / 2;
 	int y0 = Win_H / 2;
@@ -446,21 +447,20 @@ void setCoord(int i, int n) // устанавливаем координаты
 		R_ = Win_W / 2 - parametr - 10;
 	}
 	float theta = 2.0f * 3.1415926f * float(i) / float(n);
-	float y1 = R_ * cos(theta) + y0; // cos угла для вычисления положения линии(путя)
-	float x1 = R_ * sin(theta) + x0; // sin угла для вычисления положения линии(путя)
-
+	float y1 = R_ * cos(theta) + y0;
+	float x1 = R_ * sin(theta) + x0; 
 	vertC[i].x = x1;
 	vertC[i].y = y1;
 }
 
 void drawCircle(int x, int y, int R) // отрисовка круга
-
-	glColor3f(0.3, 0.9, 0.7); // установка цвета
+{
+	glColor3f(0.3, 0.9, 0.7);
 	float x1, y1;
 	glBegin(GL_POLYGON);
 	for (int i = 0; i < 360; i++)
 	{
-		float theta = 2.0f * 3.141592653589793f * float(i) / float(360); // формула точности круга
+		float theta = 2.0f * 3.141592653589793f * float(i) / float(360);
 		y1 = R * cos(theta) + y;
 		x1 = R * sin(theta) + x;;
 		glVertex2f(x1, y1);
@@ -470,7 +470,7 @@ void drawCircle(int x, int y, int R) // отрисовка круга
 	glColor3f(0.0f, 0.0f, 0.0f); // установка цвета
 	float x2, y2;
 	glLineWidth(2); // установка ширины прямой
-	glBegin(GL_LINE_LOOP); // отличие от предыдущего примитива только в том, что последний отрезок определяется последней и первой вершиной, образуя замкнутую ломаную
+	glBegin(GL_LINE_LOOP); 
 	for (int i = 0; i < 360; i++)
 	{
 		float theta = 2.0f * 3.1415926f * float(i) / float(360);
@@ -483,7 +483,7 @@ void drawCircle(int x, int y, int R) // отрисовка круга
 
 void drawText(int nom, int x1, int y1) // отрисовка текста
 {
-	GLvoid* font = GLUT_BITMAP_HELVETICA_18; // шрифт по умолчанию есть в Opengl
+	GLvoid* font = GLUT_BITMAP_HELVETICA_18; // шрифт Opengl
 	string s = to_string(nom);
 	glRasterPos2i(x1 - 5, y1 - 5);
 	for (int j = 0; j < s.length(); j++)
@@ -498,24 +498,24 @@ void drawVertex(int n) // отрисовка вершины
 		drawText(i + 1, vertC[i].x, vertC[i].y);
 	}
 }
-
-void draw_Line_for_way(int text, int x0, int y0, int x1, int y1) // отрисовка линий для путей
+// Отрисовка линий путей
+void draw_Line_for_way(int text, int x0, int y0, int x1, int y1) 
 {
-	glColor3d(0.6, 0.6, 0.6);
+	glColor3d(0, 0, 0);
 	glLineWidth(2);
-	glBegin(GL_LINES); // каждая отдельная пара вершин определяет отрезок; если задано нечетное число вершин, то последняя вершина игнорируется
+	glBegin(GL_LINES); 
 	glVertex2i(x0, y0);
 	glVertex2i(x1, y1);
 	glEnd();
 
 	drawText(text, (x0 + x1) / 2 + 10, (y0 + y1) / 2 + 10); // отрисовка текста
-
+}
 
 
 template<class T>
 void Graph<T>::RenderingGraph() // отрисовка графа
 {
-	int n = vertList.size();
+	int n = VertikList.size();
 	for (int i = 0; i < n; i++)
 	{
 		setCoord(i, n); // установка координат
@@ -545,7 +545,7 @@ void reshape(int w, int h) // функция изменения окна
 	glutPostRedisplay();
 }
 
-void draw_Text_for_menu(string text, int x1, int y1) // отрисовка текста для меню
+void draw_Text_for_menu(string text, int x1, int y1) // отрисовка текста меню
 {
 	GLvoid* font = GLUT_BITMAP_HELVETICA_18; // установка шрифта
 	string s = text;
@@ -553,12 +553,12 @@ void draw_Text_for_menu(string text, int x1, int y1) // отрисовка те�
 	for (int j = 0; j < s.length(); j++)
 		glutBitmapCharacter(font, s[j]);
 }
-
-void drawMenu() // отрисовка меню
+// отрисовка меню
+void drawMenu() 
 {
-	int move_right = 45;
-	int height = 330;
-
+	int move_right = 90;
+	int height = 630;
+	// Кнопка решения
 	glColor3d(0.14, 0.10, 0.45);
 	glBegin(GL_QUADS);
 	glVertex2i(move_right, height - move_right - 110);
@@ -568,7 +568,7 @@ void drawMenu() // отрисовка меню
 	glEnd();
 	glColor3d(0.8, 1.0, 0.9);
 	draw_Text_for_menu("Solution", move_right, height - move_right - 82);
-
+	// Кнопка добавления
 	glColor3d(0.14, 0.10, 0.45);
 	glBegin(GL_QUADS);
 	glVertex2i(move_right, height - move_right - 150);
@@ -578,7 +578,7 @@ void drawMenu() // отрисовка меню
 	glEnd();
 	glColor3d(0.8, 1.0, 0.9);
 	draw_Text_for_menu("Add element", move_right, height - move_right - 122);
-
+	//Кнопка Удаления
 	glColor3d(0.14, 0.10, 0.45);
 	glBegin(GL_QUADS);
 	glVertex2i(move_right, height - move_right - 190);
@@ -593,24 +593,14 @@ void drawMenu() // отрисовка меню
 
 void button_click(int btn, int stat, int x, int y) // реализация кнопок и их расположения
 {
-	int move = 15;
-	int height = 300;
+	int move = 60;
+	int height = 730;
 	if (stat == GLUT_DOWN)
 	{
-
-		if (x > move + 30 && x < move + 145 && y >  move + 110 && y < move + 140)
-		{
-			graph = graph_implementation();
-		}
-
-		if (x > move + 30 && x < move + 145 && y > move + 150 && y < move + 180)
-		{
-			graph.Print();
-		}
-
 		if (x > move + 30 && x < move + 145 && y >  move + 190 && y < move + 220)
 		{
-			traveler_man(ukazatel_na_matrix, n, dynamic_mas, result);
+			BestWay(Adjacency_matrix, n, dynamic_mas, result);
+			graph.Print();
 		}
 
 		if (x > move + 30 && x < move + 145 && y >  move + 230 && y < move + 260)
@@ -628,10 +618,10 @@ void button_click(int btn, int stat, int x, int y) // реализация кн�
 			cout << endl;
 			int* targetVertPtr = &targetVertex;
 
-			if (sourceVertex > kolvo_vershin || targetVertex > kolvo_vershin)
+			if (sourceVertex > goroda || targetVertex > goroda)
 			{
-				kolvo_vershin++;
-				int* vertPtr = &kolvo_vershin;
+				goroda++;
+				int* vertPtr = &goroda;
 				graph.Add_Vertex(*vertPtr);
 			}
 
@@ -648,9 +638,9 @@ void button_click(int btn, int stat, int x, int y) // реализация кн�
 			cin >> sourceVertex;
 			cout << endl;
 			int* sourceVertPtr = &sourceVertex;
-			if (sourceVertex == kolvo_vershin)
+			if (sourceVertex == goroda)
 			{
-				kolvo_vershin--;
+				goroda--;
 				graph.Delete_this_Vertex();
 			}
 			else cout << "Такого пункта нет. Удалять нечего! " << endl << endl;
